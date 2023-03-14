@@ -1,15 +1,32 @@
-new AirDatepicker('#datepicker', {
-})
+let options = {};
+const clientWidth = Math.max(
+	document.body.scrollWidth, document.documentElement.scrollWidth,
+	document.body.offsetWidth, document.documentElement.offsetWidth,
+	document.body.clientWidth, document.documentElement.clientWidth
+)
+if (clientWidth < 769) {
+	options = {
+		isMobile: true,
+		autoClose: true,
+	}
+}
+
+new AirDatepicker('#datepicker', options);
+
+
 
 const likeSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#f5f2e8"><path d="m12 21.275-1.6-1.425q-2.55-2.3-4.212-3.963Q4.525 14.225 3.55 12.9q-.975-1.325-1.362-2.45Q1.8 9.325 1.8 8.15q0-2.45 1.625-4.075T7.5 2.45q1.3 0 2.463.525 1.162.525 2.037 1.5.85-.975 2.025-1.5Q15.2 2.45 16.5 2.45q2.425 0 4.062 1.625Q22.2 5.7 22.2 8.15q0 1.175-.388 2.288-.387 1.112-1.362 2.437-.975 1.325-2.65 3-1.675 1.675-4.225 3.975Zm0-3.075q2.375-2.15 3.925-3.663 1.55-1.512 2.438-2.65.887-1.137 1.224-2.012.338-.875.338-1.725 0-1.475-.975-2.45-.975-.975-2.45-.975-1.15 0-2.137.662-.988.663-1.363 1.688h-2q-.375-1.025-1.363-1.688-.987-.662-2.137-.662-1.475 0-2.45.975-.975.975-.975 2.45 0 .875.35 1.75t1.238 2q.887 1.125 2.425 2.65Q9.625 16.075 12 18.2Zm0-6.725Z"/></svg>`;
 const likeSvgfilled = `<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#f07b61"><path d="m12 21.275-1.6-1.425q-2.55-2.3-4.212-3.963Q4.525 14.225 3.55 12.9q-.975-1.325-1.362-2.45Q1.8 9.325 1.8 8.15q0-2.45 1.625-4.075T7.5 2.45q1.3 0 2.463.525 1.162.525 2.037 1.5.85-.975 2.025-1.5Q15.2 2.45 16.5 2.45q2.425 0 4.062 1.625Q22.2 5.7 22.2 8.15q0 1.175-.388 2.288-.387 1.112-1.362 2.437-.975 1.325-2.65 3-1.675 1.675-4.225 3.975Z"/></svg>`;
 const deleteSvg = `<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24" fill="#f5f2e8"><path d="M6.925 21.2q-.925 0-1.6-.662-.675-.663-.675-1.613V6.075H3.525V3.8H8.85V2.65h6.275V3.8h5.35v2.275H19.35v12.85q0 .95-.675 1.613-.675.662-1.6.662Zm10.15-15.125H6.925v12.85h10.15ZM8.9 17h2.125V8H8.9Zm4.075 0H15.1V8h-2.125ZM6.925 6.075v12.85Z"/></svg>`;
 
 
+
+
 const form = document.querySelector('.form');
 
 form.name.addEventListener('input', () => deleteErrorMessage('name'));
 form.datepicker.addEventListener('input', () => deleteErrorMessage('datepicker'));
+form.datepicker.addEventListener('blur', () => deleteErrorMessage('datepicker'));
 form.textarea.addEventListener('input', () => deleteErrorMessage('textarea'));
 
 document.body.addEventListener('keydown', (e) => {
@@ -103,13 +120,15 @@ function toggleLike(e) {
 
 	if (likeDiv.dataset.liked === 'true')	{
 		likeDiv.innerHTML = likeSvg;
-
+		likeDiv.style.setProperty('--like-color', '#f5f2e8');
+		
 		likeDiv.dataset.liked = 'false';
-
+		
 		return;
 	}
 	
 	likeDiv.innerHTML = likeSvgfilled;
+	likeDiv.style.setProperty('--like-color', '#f07b61');
 
 	likeDiv.dataset.liked = 'true';
 }
@@ -125,7 +144,7 @@ function validateInput(inputId) {
 
 	switch (inputId) {
 		case 'name':
-			if (input.value.length < 2 || input.value.length >= 50) {
+			if (input.value.trim().length < 2 || input.value.trim().length >= 40) {
 				addErrorMessage(input, 'Введите корректное имя!')
 				return false;
 			}
@@ -139,7 +158,7 @@ function validateInput(inputId) {
 			}
 			break;
 		case 'text':
-			if (input.value.length < 3) {
+			if (input.value.trim().length < 3) {
 				addErrorMessage(input, 'Слишком короткий комментарий!')
 				return false;
 			}
@@ -156,8 +175,8 @@ function addErrorMessage(input, text) {
 	error.textContent = text;
 	error.dataset.for = input.name;
 
-	error.style.top = input.getBoundingClientRect().bottom + 5 + 'px';
-	error.style.left = input.getBoundingClientRect().left + 'px';
+	error.style.top = input.getBoundingClientRect().bottom + window.pageYOffset + 5 + 'px';
+	error.style.left = input.getBoundingClientRect().left + window.pageXOffset + 'px';
 
 	form.append(error);
 }
